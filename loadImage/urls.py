@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from primerComponente.views import PrimerViewList, PrimerViewDetail
+from loadImage.views import PrimerViewList, PrimerViewDetail
 
 urlpatterns =[
     re_path(r'^lista/$', PrimerViewList.as_view()),

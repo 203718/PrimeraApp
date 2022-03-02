@@ -1,53 +1,80 @@
-
-import imp
-from tkinter import NO
 from rest_framework.views import APIView
-from rest_framework.response import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
-# Importaciones de modelos 
+# importación de modelos
 from primerComponente.models import PrimerModelo
 
-# Importaciones de serializadores
+# importación de serializadores
 from primerComponente.serializer import PrimerTablaSerializer
+
+class CustomedResponse():
+
+    def response_custom(self, validate_data, responseCustomed, status):
+        response = {
+            "messages":responseCustomed,
+            "payload":{"data":validate_data},
+            "status":status
+        }
+        return response
 
 class PrimerViewList(APIView):
     def get(self, request, format=None):
         querySet = PrimerModelo.objects.all()
-        serializer=PrimerTablaSerializer(query,maty=True, context={'request':request})
-        return Response(serializer.data)
+        serializer=PrimerTablaSerializer(querySet,many=True, context={'request':request})
+        response_custom = CustomedResponse()
+        return Response(response_custom.response_custom(serializer.data, 'success', status = status.HTTP_200_OK))
 
-    def post(sefl, request, format=None):
-        serializer=PrimerTablaSerializer(data=request.data, context={'request':request}
+    def post(self, request, format=None):
+        serializer=PrimerTablaSerializer(data=request.data, context={'request':request})
+        response_custom = CustomedResponse()
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(response_custom.response_custom(serializer.data, 'Success', status.HTTP_201_CREATED))
         else:
-            return Response(serializer.errors, status=status.HTTP_201_CREATED)
+            return Response(response_custom.response_custom(serializer.errors, 'Error', status.HTTP_400_BAD_REQUEST))
 
 class PrimerViewDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return PrimerModelo.object.get(pk=pk)
+            return PrimerModelo.objects.get(pk=pk)
         except PrimerModelo.DoesNotExist:
             return 404
 
-    def get(sel, request, pk, format=None)
+    def get(self, request, pk, format=None):
         idResponse = self.get_object(pk)
-        serializer = PrimerTablaSerializer(idResponse, context={'request':request})
-        if idResponse ! = 404:
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        response_custom = CustomedResponse()
+        #serializer = PrimerTablaSerializer(idResponse, context={'request':request})
+        if idResponse != 404:
+            serializer = PrimerTablaSerializer(idResponse, context={'request':request})
+            return Response(response_custom.response_custom(serializer.data, 'Success', status.HTTP_200_OK))
         else:
-            return Response('No Encontrado', status=status.HTTP_BAD_REQUEST)
+            return Response(response_custom.response_custom('Not Found','Error', status=status.HTTP_400_BAD_REQUEST))
 
-def put(self, request, pk, format=None):
-    idResponse = self.get_object(pk)
-    if idResponse != 404:
-        serializer =PrimerTablaSerializer(idResponse, dta=request.data, context={'request':request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    def put(self, request, pk, format=None):
+        idResponse = self.get_object(pk)
+        response_custom = CustomedResponse()
+        if idResponse != 404:
+            serializer =PrimerTablaSerializer(idResponse, data=request.data, context={'request':request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(response_custom.response_custom(serializer.data,'Success',status = status.HTTP_200_OK))
+            else:
+                return Response(response_custom.response_custom(serializer.errors,'Error',status = status.HTTP_400_BAD_REQUEST))
         else:
-            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response('Id no encontrado', status = status.HTTP_400_BAD_REQUEST)
+            return Response(response_custom.response_custom('Id no encontrado','Error',status = status.HTTP_400_BAD_REQUEST))
+
+
+    def delete (self, request, pk, format=None):
+        idResponse = self.get_object(pk)
+        response_custom = CustomedResponse()
+        if idResponse !=404:
+            serializer = PrimerTablaSerializer(idResponse, data= request.data , context={'request': request})
+            if serializer.is_valid():
+                idResponse.delete()
+                return Response(response_custom.response_custom(serializer.data,'Success',status = status.HTTP_200_OK))
+            else:
+                return Response(response_custom.response_custom(serializer.errors,'Error',status = status.HTTP_400_BAD_REQUEST))
+        else:
+            return Response(response_custom.response_custom('Id no encontrado','Error',status = status.HTTP_400_BAD_REQUEST))    

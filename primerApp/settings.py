@@ -1,3 +1,14 @@
+#import environ
+import os 
+
+#env = environ.Env(
+#    DEBUG=(bool, False)
+#)
+
+#SECRET_KEY = env('SECRET_KEY')
+
+#DEBUG = True
+
 """
 Django settings for primerApp project.
 
@@ -40,16 +51,19 @@ INSTALLED_APPS = [
 
     # Componentes agregados
     'primerComponente',
-    'Login',
+    'Login', 
+    'Register',
+    'loadImage',
 
     # Librerias para el proyecto
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES':('rest_framework.permissions.IsAuthenticated',),
-    'DEFAULT_AUTHENTICATION_CLASSES':('rest_framework.authentication.TokenAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES':('rest_framework.authentication.TokenAuthentication','rest_framework_simplejwt.authentication.JWTAuthentication',),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100
 }
@@ -62,6 +76,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
 ]
 
 ROOT_URLCONF = 'primerApp.urls'
@@ -125,6 +144,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+#Ruta para acceder a los archivos
+MEDIA_URL = '/assets/'
+
+#Carptea dónde se guardarán los archivos
+MEDIA_ROOT = os.path.join(BASE_DIR, 'assets')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -134,3 +159,4 @@ try:
     from primerApp.local_settings import *
 except ImportError :
     pass
+
